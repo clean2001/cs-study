@@ -1,4 +1,4 @@
-# 🍀My cs studyfi
+# 🍀My cs study
 
 ## 📚Table of Contents
 
