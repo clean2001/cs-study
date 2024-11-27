@@ -230,8 +230,27 @@ URN은 http 같은 프로토콜을 제외하고 리소스의 이름으로 리소
 
 ### **15. SOP 정책에 대해 설명해 주세요.**
 
+  답변: SOP(Same Origin Policy)란 웹 생태계에서 같은 출처의 리소스만 공유할 수 있도록 제한하는 정책이다.
+    프로토콜, 호스트, 포트가 같으면 출처(Origin)이 같다고 한다. 
+    같은 출처끼리만 자원을 공유할 수 있게 하는 이유는 보안 때문이다. SOP가 없다면 악성사이트에서 클라이언트로 악의적인 동작을 수행하는 자바스크립트 코드를 보내면, 사용자의 브라우저는 해당 코드대로 동작하여 정보가 탈취 당하는 등의 피해를 볼 수 있다.
+    따라서 다른 출처로부터 리소스를 받을 수 없게 만들어서 이와 같은 위험을 제거하는 것이 SOP이다.
+
 - **CORS 정책이 무엇인가요?**
+  SOP 정책의 예외로 다른 출처 간의 자원 공유를 허용하는 정책이 CORS(Cross-Origin Resource Sharing)이다.
+  CORS의 동작은 아래와 같다.  
+  1. 브라우저에서 HTTP 요청 헤더에 Origin을 담아 서버에 요청을 보낸다.
+  2. 서버는 응답 헤더에 Access-Control-Allow-Origin을 담아 클라이언트의 브라우저로 반횐한다.
+  3. **브라우저**는 자신이 보낸 요청의 Origin과 서버 응답의 Access-Control-Allow-Origin을 비교한다. 만약 일치하지 않는다면 해당 응답은 버려진다.
+
+  여기서 중요한 것은 Origin과 Access-Control-Allow-Origin의 대조를 브라우저가 하고, Origin이 허용되지 않은 Origin이면 막는 것을 브라우저가 한다는 것이다. 따라서 포스트맨과 같이 브라우저를 통해 요청을 보내는 상황이 아니라면 SOP가 적용되지 않는다.
+
 - **Preflight에 대해 설명해 주세요.**
+  지금 보내는 요청이 유효한지를 확인하기 위해 OPTIONS 메서드로 예비 요청을 보내는 것을 말한다. 아래 조건일 때만 Preflight 요청을 먼저 보내게된다.
+
+  조건:
+  - Content-Type이 `application/x-www-form-urlencoded`, 'multipart/form-data', 'text/plain' 중 하나인 `GET`, `HEAD`, `POST` 요청
+  - 요청에 사용된 XMLHttpRequest.upload 객체에 이벤트 리스너가 등록돼있지 않을 때
+  - ReadableStream 객체가 요청에서 사용되지 않을 때
 
 ### **16. Stateless와 Connectionless에 대해 설명해 주세요.**
 
