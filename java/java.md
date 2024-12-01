@@ -64,11 +64,48 @@
 
 ### 4. 부동소수점이 무엇인가요?
 
+  - 답변: 
+   컴퓨터에서 부호, 가수부, 지수부를 통해 실수를 표현하는 방법이다. 부동소수점 방식은 고정 소수점 방식보다 표현할 수 있는 실수의 범위가 더 넓지만, 정확도에 약간의 오차가 있다. 부동소수점 방식을 사용하는 실수 자료형은 float, double 등이 있다. 
+
+  
+    래퍼런스: https://velog.io/@maketheworldwise/float-double-%EB%B6%80%EB%8F%99%EC%86%8C%EC%88%98%EC%A0%90
+
 - **부동소수점을 사용하면, 소수 계산 오차 문제가 사라지나요?**
+  
+  - 답변: 사라지지 않는다. 부동소수점 방식의 표현에는 정확도에 약간의 오차가 있다. 이로 인해 예상치 못한 결과가 발생할 수 있으며, 이는 금융 계산과 같이 정밀한 계산이 필요한 경우에 큰 문제를 일으킬 수 있다.
 
 - **자바에서 실수형 계산을 정확하게 하기 위해서는 어떻게 해야 하나요?**
+  
+  - 답변: 자바에서는 BigDecimal 클래스를 이용해서 부동소수점의 오차문제를 해결할 수 있다. BigDecimal은 손실이 없는 정확한 소수점 연산을 지원하기에, 금융 계산과 같이 정밀한 계산이 필요한 애플리케이션에서 많이 사용된다.
+
+  ```java
+  BigDecimal a = new BigDecimal("0.1");
+  BigDecimal b = new BigDecimal("0.2");
+  BigDecimal result = a.add(b);
+  ```
+
+  subtract, multiply, divide 등의 메서드를 제공하여 산술 연산이 가능하다. 이중, divide 메서드는 반올림 모드를 지정해주어야한다. BigDecimal은 무한 소수를 표현할 수 있기 때문에, 연산 결과가 무한 소수가 될 경우 반올림 모드를 지정하지 않으면 ArithmeticException이 발생한다.
+
+
+  또한 BigDecimal은 정밀한 계산을 가능하게 하지만, float, double에 비해 성능상의 오버헤드가 존재한다. 따라서 성능이 중요한 애플리케이션에서는 사용 전에 성능 테스트를 진행하는 것이 좋다.
+  또한 BigDecimal은 불변 객체이므로, 연산을 수행할 때마다 새로운 객체가 생성된다. 이는 메모리 사용량이 증가할 수 있으므로 메모리 관리에도 주의가 필요하다.
+  
 
 - **그렇다면 BigDecimal 은 실수를 어떤 형태로 저장하나요?**
+  - 답변: BigDecimal은 intValue * 10 ^ (-scale)과 같은 형식으로 수를 표현한다. 예를 들어 123.45는 12345 * 10 ^ (-2)로 표현된다.
+
+  ```java
+  public class BigDecimal extends Number implements Comparable<BigDecimal> {
+
+    private final BigInteger intVal; // 수를 구성하는 전체 자리수
+
+    private final int scale;  // 전체 소수점 자리수
+
+    private transient int precision; // 정밀도
+
+    // ...
+  }
+  ```
 
 ### 5. `==` 과 `equals` 의 차이점은 무엇인가요?
 
