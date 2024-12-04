@@ -366,3 +366,10 @@ H
 - **로컬호스트 주소는 어떤 용도로 사용되나요?**
 
 ### 27. form-data 와 x-www-form-urlencoded 의 차이는 무엇인가요?
+  - 답변:
+      - x-www-form-urlencoded: 앰퍼샌드로 구분된 하나의 큰 String으로 서버에 전달된다. 알파벳이 아닌 문자는 '%HH'의 형식으로 치환된다. 즉 알파뱃에 아닌 모든 데이터는 각각 3바이트씩 차지하는 것이다. 이는 굉장히 비효율적이다. 이것이 multipart/form-data가 생겨난 이유이다.
+
+      - multipart/formdata: 이 방식도 key=value 형식으로 데이터를 전달하지만, 각각의 키벨류 페어는 MIME 메시지의 part로 나누어진다. 각각의 part는 string 형식의 boundary로 나누며 각각의 Part는 MIME header를 가진다. MIME 헤더를 가짐으로써 value 데이터를 나타내는 방식이 더욱 자유로워져서, 각각의 데이터마다 더욱 효율적인 인코딩(encoding) 방식을 적용할 수 있다.
+
+    - 그렇다면 모든 데이터전송은 form-data로 하면 되는 것일까? => 아니다. 간단한 알파벳형식의 텍스트 전송은 MIME header를 붙이는데 드는 오버헤드가 binary encoding으로 절약하는 비용보다 크다. 그래서 간단한 텍스트 전송을 x-www-form-urlencoded로 해결하는 것이 좋다.
+
