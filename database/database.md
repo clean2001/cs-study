@@ -144,7 +144,7 @@ redo 영역: 커밋된 트랜잭션의 변경 내역을 저장해서 시스템 �
 
 - **DB와 Client가 Connection을 어떻게 구성하는지 설명해 주세요.**
   reference: https://orange-makiyato.tistory.com/85
-  
+
 1. 드라이버 로드. DB 종류에 맞는 드라이버를 로드한다.
 2. 데이터베이스 계정 연결. DriverManager.getConnection() 메서드로 Connection 객체를 생성해준다.
 3. SQL문 실행을 위한 객체 생성
@@ -158,4 +158,27 @@ redo 영역: 커밋된 트랜잭션의 변경 내역을 저장해서 시스템 �
 
 ### **16. SQL Injection에 대해 설명해 주세요.**
 
+- 답변: SQL injection이란 악의적인 사용자가 보안상의 취약점을 이용하여 임의의 SQL문을 주입하고 실행되게 하여 데이터베이스가 비정상적인 동작을 하도록 조작하는 행위이다.
+
+
+#### 공격 종류 및 방법
+
+- Error based SQL Injection: 논리적 에러를 이용한 SQL Injection. 가장 많이 쓰이고 대중적인 공격 기법이다. 주로 OR 1=1 이라는 구문을 끼워넣어 모든 데이터를 조회하게 함
+- Union Based SQL Injection: SQL에서 Union 키워드는 두개의 쿼리문에 대한 결과를 통합해서 하나의 테이블로 보여주게하는 키워드이다. 정상적인 쿼리문에 union 키워드를 사용하여 인젝션에 성공하면 원하는 쿼리문을 실행할 수 있다. union injection에 성공하려면 두 테이블의 컬럼수가 같아야하고, 데이터 형이 같아야한다.
+- Blind SQL injection > Boolean based SQL: Blind SQL injection은 데이터베이스로부터 특정한 값이나 데이터를 전달받지 않고, 단순히 참과 거짓의 정보만 알 수 있을 때 사용한다. 아래 사진은 Blind Injection을 이용하여 데이터베이스의 테이블 명을 알아내는 예시.
+[!blind injection](./assets/blind.png)
+
+- Blind SQL injection > Time based SQL: 서버로부터 특정한 응답 대신에 참 혹은 거짓의 응답을 통해 데이터베이스의 정보를 유추하는 기법. MySQL 기준으로 SLEEP, BENCHMARK를 많이 사용한다.
+
+- Stored Procedure SQL Injection: 저장 프로시저는 일련의 쿼리들을 모아 하나의 함수처럼 사용하기 위한 것이다. 공격에 사용되는 대표적인 저장 프로시저는 MS-SQL에 있는 xp_cmdshell로 윈도우 명령어를 사용할 수 있게 된다. 단, 공격자가 시스템 권한을 획득해야 하므로 공격난이도가 높으나, 공격에 성공한다면 서버에 직접적인 피해를 입힐 수 있다.
+
+- Mass SQL Injection: 기존 SQL Injection 공격과 달리 다량의 데이터베이스가 조작되어 큰 피해를 입히는 것을 의미한다. 보통 MS-SQL을 사용하는 ASP 기반 웹 애플리케이션에서 많이 사용되며 쿼리문은 HEX 인코딩 방식으로 인코딩하여 공격한다. 보통 데이터베이스 값을 변조하여 데이터베이스에 악성스크립트를 삽입하고, 사용자들이 변조된 사이트에 접속 시 좀비 PC로 감염되게 한다. 이렇게 감염된 좀비 PC들은 DDoS 공격에 사용된다.
+
+
+https://noirstar.tistory.com/264
+
 - **그렇다면, 우리가 서버 개발 과정에서 사용하는 수많은 DB 라이브러리들은 이 문제를 어떻게 해결할까요?**
+
+  - 답변: ORM 프레임워크의 경우 Prepared Statement를 자동으로 사용한다.
+    - 특수 문자를 자동으로 이스케이프처리한다. 즉, `\`를 특수문자 앞에 붙여서 해당 문자를 일반 문자로 취급하도록 만든다.
+    - 타입 캐스팅을 강제하여 입력값을 검증한다. 예를 들어 '2024-10-29'가 들어왔을 때, 날짜 타입으로 변환한다.
