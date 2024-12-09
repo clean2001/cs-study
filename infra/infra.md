@@ -35,6 +35,23 @@
 
 
 ### 4. Git에 대해 설명해 주세요.
+  - 답변: git이란 분산 버전 관리 시스템(Distributed Version Control System)이다. 컴퓨터 파일의 변경사항을 추적하고 여러명의 사용자들 간의 파일에 대한 작업을 조율하는 데 사용된다. 즉, 주로 여러명의 개발자가 하나의 소프트웨어 개발 프로젝트에 참여할 때, 소스코드의 버전을 관리하는 데 주로 사용된다.
+
+#### 깃의 구조
+- Repository: 저장소. 저장소는 히스토리, 태그, 소스의 가지치기 혹은 branch에 따라 버전을 저장한다. 작업자가 변경한 모든 히스토리를 확인 가능하다.
+- Working Directory : 저장소를 어느 한 시점을 바라보는 작업자의 현재 시점이다. Working Directory(Workspace)에서 작업 후 새로운 버전이 될 후보군은 Staging Area로 이동한다.
+- Staging Area: 이 단계에서는 Local Repository로 파일을 넣기 위한 대상 목록이 관리된다. 로컬 저장소로 넣으면 그때부터 이력이 생성된다.
+- 로컬 저장소(local repo): 커밋을 하면 로컬 리포지토리에 저장되며 새로운 버전이 생성된다. 이때 staging area는 비워지게 된다.
+- 원격 저장소(remote repo): push하면 local repo에 저장된 내용이 원격 저장소에 반영된다.
+
+#### git fetch와 git pull의 차이점
+- git fetch: origin 데이터를 로컬로 가져오되 병헙은 하지 않음. 즉 remote repo의 내용을 local repo까지는 가져오지만 staging area와 working directory에는 반영하지 않는다. 즉, 머지는 하지 않기 때문에 충돌이 발생하지 않는다.
+- git pull: remote repo의 수정사항을 working directory까지 가져오며 머지한다. 머지시에 충돌이 생길 가능성이 있다.
 
 - **여러 브랜치를 합쳐야 할 때, 어떤 방법을 사용할 수 있는지 "모두" 설명해 주세요.**
-- **여러 브랜치를 합쳐야 할 때, 어떤 방법을 사용할 수 있는지 "모두" 설명해 주세요.**
+
+#### merge 전략
+- merge: 두 브랜치의 변경을 통합하는 가장 기본적인 방법이다. 서브 브랜치에 있는 commit Id들과 merge할때 생기는 merge commitID가 main 브랜치에 남게 된다.
+- rebase merge: 한 브랜치의 커밋을 다른 브랜치의 최신 커밋에 재적용하는 방식이다. 이때에는 브랜치에서 넘어온 commitID가 아닌 새로운 commitID가 발급되어 메인브랜치에 남게된다. 장점은 merge commitID가 남지 않게되어 불필요한 커밋 없이 깔끔하게 커밋이 관리된다. 단점은 commit history는 유지되지만, 모든 커밋아이디가 변경돼서 main에 반영되므로 동일 브랜치에서 재PR시에 충돌이 발생한다. 따라서 한번 머지된 브랜치는 재사용이 불가능하다.
+- squash merge: squash는 여러 커밋을 하나의 커밋으로 합치는 과정이다. local repository에서 여러 커밋을 발생시켰을 때, 해당 커밋 ID를 통합하여 하나의 commitID로 만들어서 main에는 하나의 커밋이력으로 남게된다. squash merge또한 이미 머지된 브랜치의 재사용은 불가능하다.
+- cherry pick: dev에서 채번된 branch1, branch2가 모두 dev에 머지돼있을 때, branch1만 main으로 머지하고 싶은 상황. 즉 특정 커밋이력만 pick해서 머지하는 것이 cherry pick이다. 문제점은 기존의 commitID 체리픽을 통해 main merge된 이후 생성된 commitID가 일치하지 않는 경우 추후 dev 전체를 main에 머지할 때 충돌이 발생한다.
