@@ -303,8 +303,17 @@ URN은 http 같은 프로토콜을 제외하고 리소스의 이름으로 리소
 - **그렇다면, 255.0.255.0 같은 꼴의 서브넷 마스크도 가능한가요?**
 
 ### **20. 멀티플렉싱과 디멀티플렉싱에 대해 설명해 주세요.**
+  - 전송 계층에서 제공하는 기본적인 기능이다.
+  - 하나의 머신에서 여러개의 프로세스들이 존재하고 개별 프로세스들은 다른 머신과의 네트워크를 하기 위해서 하나의 통로를 거쳐야하는데 이 과정을 의미한다.
+  - sender에서 여러 개의 프로세스가 각자의 소켓을 가지고 메시지를 보내게 된다면 TCP나 UDP를 통해서 이 과정에서 멀티 플렉싱이 일어난다.
+  - receiver에서는 주로 디멀티플렉싱이 일어난다.
+
+  - 멀티 플렉싱: 전송계층에서 헤더에 목적지에 대한 정보를 입력
+  - 디멀티플렉싱: 전송계층에서 세그먼트를 받아 윗 계층에 존재하는 여러 프로세스들에게 정확하게 전달해주기 위해 그 헤더를 보고 어떤 프로세스에 전달해줘야하는지 확인하고 적절히 나눠주는 것. (참고: 세그먼트는 payload와 header로 이뤄져있다. 헤더에는 반드시 Source port와 Destination port가 포함돼야한다.)
 
 - **디멀티플렉싱의 과정에 대해 설명해 주세요.**
+  - UDP: 호스트 A -> 호스트 B로 데이터가 전달될때, 호스트 A는 헤더 정보를 담은 세그먼트를 생성하여 네트워크 계층에 전달한다 (=멀티 플렉싱), 네트워크 계층은 세그먼트 를 IP datagram으로 캡슐화하여 수신 호스트 B에게 전달한다. 호스트 B측에 세그먼트가 전달되면 전송계층은 destination port number를 확인하고 해당 포트 넘버 소켓에 데이터를 전달한다. (=디멀티플렉싱) 여기서 source port number는 return address의 역할을 한다. 호스트 B가 답장을 보내고 싶다면 해당 포트를 segment의 destination port로 지정한다.
+  - TCP: TCP 소켓은 UDP 소켓과는 다르게 (source IP 주소, source port number, destination IP 주소, destination port number) 네가지에 의해 식별된다. TCP 어플리케이션은 welcoming socket을 가지고 있고, 클라이언트에 의해 연결이 생성될 때까지 대기한다. 더이상 연결을 생성하고 싶지 않다면 이 welcoming socket의 상태를 변경시키면 된다. 클라이언트가 소켓을 생성하여 연결을 만들면 세그먼트에는 연결 생성에 쓰이는 특별한 비트값, source port number, destination port number가 기록된다. 서버 OS가 destination port number가 담긴 요청 segment를 받으면, 해당 port number에 대기중인 process를 찾아내고, 해당 process는 새로운 소켓을 생성해낸다. 새롭게 생성된 소켓은 (source IP, souce port, destination IP, destination port)에 의해 식별된다. 이 네개의 값이 동일한 소켓이 값이 일치하는 세그먼트를 디멀티플렉싱한다. 결론적으로 서버는 동시에 수많은 TCP 소켓을 지원해야하며 각 소켓은 하나의 프로세스에 귀속된다.
 
 ### **21. XSS에 대해서 설명해 주세요.**
   
