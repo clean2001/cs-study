@@ -182,7 +182,8 @@ redo 영역: 커밋된 트랜잭션의 변경 내역을 저장해서 시스템 �
      ```
      오라클의 옵티마이저는 UNIQUE INDEX를 가지고 있는 empno를 먼저 조회한다. empno는 유니크 제약 조건으로 유일한 값을 보장하므로 1번만 조회하면 되기 때문이다.
      - index full scan: 인덱스 풀 스캔은 인덱스 테이블을 모두 스캔한다. index full scan은 결합 컬럼 인덱스를 만들 때 발생할 수 있는 듯 하다. 결합 컬럼 인덱스는 컬럼의 순서가 중요한데, 유니크한 컬럼을 더 앞에 두면 index full scan이 발생하는 것 같다. 복합 인덱스를 걸때 컬럼의 순서를 잘 정하면 Index full scan이 아니라 index range scan으로 데이터를 찾을 수 있다. 자세한 내용은 해당 [포스팅](https://escapefromcoding.tistory.com/777)을 참고
-    - index skip scan: 인덱스 스킵 스캔응 결합 컬럼 인덱스의 첫 컬럼이 WHERE에 있지 않아도 인덱스를 이용할 수 있는 방식이다. 경우에 따라 index full scan을 개선해 사용할 수도 있다.
+     - 
+     - index skip scan: 인덱스 스킵 스캔응 결합 컬럼 인덱스의 첫 컬럼이 WHERE에 있지 않아도 인덱스를 이용할 수 있는 방식이다. 경우에 따라 index full scan을 개선해 사용할 수도 있다.
 <img width="534" alt="스크린샷 2024-12-14 오후 4 36 19" src="https://github.com/user-attachments/assets/82ba0357-b673-43dd-a343-d5fb89be5eb7" />
 
     - index fast full scan: index fast full scan은 full scan을 해야할 때, index full scan보다 속도가 더 향상된 것으로, 싱글 I/O 방식이 아닌 multi-block I/O 방식으로 한번에 많은 데이터를 조회하는 방식이다. 이 방법은 꼭 인덱스에 NOT NULL 제약조건이 필요하고 조회 결과 정렬을 보장하지 않는다.
