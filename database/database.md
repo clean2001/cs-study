@@ -183,14 +183,28 @@ redo 영역: 커밋된 트랜잭션의 변경 내역을 저장해서 시스템 �
      오라클의 옵티마이저는 UNIQUE INDEX를 가지고 있는 empno를 먼저 조회한다. empno는 유니크 제약 조건으로 유일한 값을 보장하므로 1번만 조회하면 되기 때문이다.
      - index full scan: 인덱스 풀 스캔은 인덱스 테이블을 모두 스캔한다. index full scan은 결합 컬럼 인덱스를 만들 때 발생할 수 있는 듯 하다. 결합 컬럼 인덱스는 컬럼의 순서가 중요한데, 유니크한 컬럼을 더 앞에 두면 index full scan이 발생하는 것 같다. 복합 인덱스를 걸때 컬럼의 순서를 잘 정하면 Index full scan이 아니라 index range scan으로 데이터를 찾을 수 있다. 자세한 내용은 해당 [포스팅](https://escapefromcoding.tistory.com/777)을 참고
     - index skip scan: 인덱스 스킵 스캔응 결합 컬럼 인덱스의 첫 컬럼이 WHERE에 있지 않아도 인덱스를 이용할 수 있는 방식이다. 경우에 따라 index full scan을 개선해 사용할 수도 있다.
-    - index fast full scan: 
+<img width="534" alt="스크린샷 2024-12-14 오후 4 36 19" src="https://github.com/user-attachments/assets/82ba0357-b673-43dd-a343-d5fb89be5eb7" />
+
+    - index fast full scan: index fast full scan은 full scan을 해야할 때, index full scan보다 속도가 더 향상된 것으로, 싱글 I/O 방식이 아닌 multi-block I/O 방식으로 한번에 많은 데이터를 조회하는 방식이다. 이 방법은 꼭 인덱스에 NOT NULL 제약조건이 필요하고 조회 결과 정렬을 보장하지 않는다.
+<img width="597" alt="스크린샷 2024-12-14 오후 4 37 53" src="https://github.com/user-attachments/assets/af0acd42-2ee1-4bd0-b5b7-7c68a4fc0a43" />
+DB 쿼리문을 사용하면 Database Buffer Cache에 캐시 데이터를 저장한다. Single-Block I/O는 논리적으로 저장돼 있는 데이터를 순차적으로 한 블록씩만 읽기 때문에 정렬을 보장하지만 상대적으로 느리다. multi-block I/O는 물리적으로 저장돼 있는 데이터를 한번에 읽으므로 I/O 횟수가 줄어들어 속도는 빠르지만 정렬을 보장하지 않는다. 주로 Group by를 활용한 쿼리문에서 사용된다.
+
+- index merge scan: 인덱스 머지 스캔은 여러 개의 인덱스를 사용하여 하나의 인덱스만 사용했을 때보다 테이블 액세스를 줄이는 방법이다.
+- index bit map merge scan: index merge scan에서 한단계 더 발전해서 인덱스 테이블을 비트맵 인덱스 테이블로 변환해서 스캔하는 방법이다. 비트맵으로 변환하고 접근하기 때문에 일반적으로 index merge scan보다 우수한 속도를 보인다.
+<img width="614" alt="스크린샷 2024-12-14 오후 4 53 32" src="https://github.com/user-attachments/assets/ca5bd846-ac76-4523-91c9-c51f4bc4d4d9" />
 
    
   - 정리하자면 대용량의 데이터 중에서 극히 일부의 데이터를 찾을 때, 인덱스 스캔 방식을 통해 몇번의 I/O만으로 원하는 데이터를 쉽게 찾을 수 있다. 전체 테이블 스캔(Full Table Scan)은 테이블의 모든 데이터를 읽으면서 원하는 데이터를 찾아야 하기 때문에 비효율적인 검색을 하게 된다. 하지만 테이블의 대부분의 데이터를 찾을 때는 한 블록씩 읽는 인덱스 스캔 방식보다는 한번에 여러 블록을 읽는 전체 테이블 스캔이 유리할 수 있다.
 
 
 - **가끔은 인덱스를 타는 쿼리임에도 Table Full Scan 방식으로 동작하는 경우가 있습니다. 왜 그럴까요?**
+    - **데이터 분포도 기반 판단**: 조회하려는 데이터가 전체 테이블의 20~25% 이상을 차지할 경우, 옵티마이저는 인덱스 스탠보다 full scan이 더 효율적이라고 판단한다. in 연산자 사용 시 포한된 데이터의 비율이 높다면 table full scan이 선택된다.
+    - **인덱스 사용이 비효율적인 경우**: 인덱스 컬럼을 변형하여 사용하는 경우(예시: TO_CHAR(column_name), LIKE 검색 시 와일드카드(%)가 앞에 위치하는 경우(LIKE '%값'), 복합 인덱스의 순서를 올바르게 사용하지 않은 경우 등
+    - **시스템 환경 요인**: 테이블의 크기가 작아서 `DB_FILE_MULTIBLOCK_READ_COUNT` 이내의 블록으로 구성된 경우, 병렬 처리가 필요한 경우 등 (병렬 처리는 Full Table Scan이 더 효율적이라고 한다.)
 - **COUNT (개수를 세는 쿼리) 는 어떻게 동작하나요? COUNT(1), COUNT(\*), COUNT(column) 의 동작 과정에는 차이가 있나요?**
+  - COUNT(*)의 동작 방식: 테이블의 모든 행을 카운트하며 NULL도 포함된다. **실제로 데이터를 읽지 않고 레코드 수만 불러오기 때문에 가장 빠른 성능**을 보인다. 옵티마이저가 가장 효율적인 Execution Plan을 가질 수 있다. 일반적인 행 카운트는 COUNT(*)를 사용하는 것이 가장 효율적이다.
+  - COUNT(1)의 동작 방식: COUNT(*)과 동일한 방식으로 동작한다. 쿼리 결과의 모든 레코드를 1로 대체한 후 카운트한다. 성능상 COUNT(*)과 차이가 없다. 그렇기 때문에 COUNT(*) 대신 이를 사용할 때의 이점은 없다.
+  - COUNT(column)의 동작 방식: 지정된 컬럼의 NULL이 아닌 값만 카운트한다. 실제 데이터를 읽어야하므로 COUNT(*)보다 성능이 떨어진다. NULL 체크 로직이 추가되어 처리 과정이 더 복잡하다. NULL을 제외한 카운트가 필요한 경우에만 COUNT(column)을 사용해야한다.
 
 ### **16. SQL Injection에 대해 설명해 주세요.**
 
