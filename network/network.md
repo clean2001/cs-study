@@ -279,9 +279,29 @@ URN은 http 같은 프로토콜을 제외하고 리소스의 이름으로 리소
 
 ### **16. Stateless와 Connectionless에 대해 설명해 주세요.**
 
+#### Connectionless
+http 통신에서 클라이언트가 서버에 요청을 하고 응답을 받으면 바로 TCP/IP 연결을 끊는 특징을 의미
+
+#### Stateless
+http 통신은 통신이 한번 끝나면 더이상 클라이언트의 상태를 유지하지 않음을 의미.
+stateless의 반대되는 표현은 stateful인데, 서버가 이전 요청에서의 클라이언트의 상태를 보존하는 것을 의미한다.
+
 - **왜 HTTP는 Stateless 구조를 채택하고 있을까요?**
+  - 단순성, 확장성, 무상태 연결, 성능, 데이터 일관성 때문이다.
+  - stateless 구조로 서버가 클라이언트의 상태를 추적할 필요가 없으므로 개발과 유지보수가 간단해진다.
+  - 서버가 클라이언트의 상태를 추적할 필요가 없어 수천, 수백만 사용자를 처리하는 대규모 서비스에 적합하다.
+  - 상태 정보를 저장하고 관리하지 않아도 되므로 서버 자원을 효율적으로 사용할 수 있고, 로드밸런싱이 쉽다.
+  - 각 요청과 응답이 독립적이어서 여러 서버가 동일한 요청을 처리할 수 있다. 이는 분산시스템에서 중요하다.
+  - 여러 서버 사이에서 데이터 일관성을 지킬 수 있다.
 - **Connectionless의 논리대로면 성능이 되게 좋지 않을 것으로 보이는데, 해결 방법이 있을까요?**
+   - 지속적인 연결이 필요할 때는 keep-alive를 통해 http 연결을 길게 유지할 수 있다.
+
+  - keep alive란 single connection으로 여러 request, response들을 주고 받을 수 있게끔 해주는 persistent connection을 만드는 기능 중 하나이다. 이 keep-alive를 통해 얻을 수 있는 장점은 매 request마다 새로운 connection을 맺을 필요가 없기 때문에 3-way handshake를 하지 않아 해당 작업을 하면서 생기는 지연을 줄일 수 있다. 또한 많은 connection을 맺고 끊음으로써 발생할 수 있는 네트워크 혼잡 상황을 방지할 수 있다. 하지만 keep-alive로 생기는 문제도 존재한다. client가 연결을 점유하고 있기에 server에서 connection을 맺을 소켓이 부족해지는 문제가 발생할 수 있다. 이는 서버에서 keep-alive 설정값을 조정함으로써 해결할 수 있다. [reference](https://velog.io/@jihwankim94/Network-TCP-HTTP-Keep-alive)
+
 - **TCP의 keep-alive와 HTTP의 keep-alive의 차이는 무엇인가요?**
+
+  - TCP Keep Alive: TCP 계층에서 연결을 주기적으로 확인하기 위해서 ACK을 주고 받는 행위, ACK을 정상적으로 받지 못하면 OS에서 TCP 연결을 종료한다.
+  - HTTP keep-alive: HTTP 계층에서 일어난 http 연결을 유지하는 매커니즘. keep-alive 시간동안 http 요청을 받지 못하면 TCP connection을 종료한다. 이 연결을 종료시키는 주체는 서버이다. 즉, 따로 Syn, Ack 같은 **패킷을 주고 받으면서 연결을 더 유지할까 말까를 판단하지 않는다.** 헤더를 통해 규약을 지킬 수 있으며, HTTP 1.1 부터는 keep-alive가 디폴트 값이다.
 
 ### **17. 라우터 내의 포워딩 과정에 대해 설명해 주세요.**
 
